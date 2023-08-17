@@ -1,15 +1,33 @@
-// Prevents additional console window on Windows in release, DO NOT REMOVE!!
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+use tauri::{ Window, State};
+use tauri_dialog::file::open_directory;
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+struct AppState {
+    selected_directory: Option<String>,
+    image_paths: Vec<String>,
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+        .setup(|app| {
+            app.add_resource(AppState {
+                selected_directory: None,
+                image_paths: Vec::new(),
+            });
+        })
+        .invoke_handler(tauri::generate_handler![open_directory_dialog])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[tauri::command]
+fn open_directory_dialog(app_state: State<AppState>, window: Window) {
+    tauri::async_runtime::block_on(async {
+        if let Some(result) = open_directory().await.unwrap() {
+            let directory_path = result.path();
+            app_state.selected_directory.replace(directory_path.to_string_lossy().to_string());
+            let image_paths = // Retrieve image paths from the selected directory
+            app_state.image_paths = image_paths;
+            window.emit("directorySelected", app_state.image_paths.clone()).unwrap();
+        }
+    });
 }
