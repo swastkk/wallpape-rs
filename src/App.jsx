@@ -1,46 +1,52 @@
-import React, { useState } from 'react';
-import { invoke } from '@tauri-apps/api/tauri';
+import React, { useState } from "react";
+import { invoke } from "@tauri-apps/api/tauri";
+import "./App.css";
 
-const App = () => {
-  const [selectedDirectory, setSelectedDirectory] = useState('');
-  const [imagePaths, setImagePaths] = useState([]);
-  const [selectedImage, setSelectedImage] = useState('');
+function App() {
+  const [wallpapers, setWallpapers] = useState([]);
+  const [selectedWallpaper, setSelectedWallpaper] = useState("");
+  const [error, setError] = useState("");
 
-  const openDirectoryDialog = async () => {
+  async function fetchWallpapers() {
     try {
-      const result = await invoke('open_directory_dialog');
-      if (result) {
-        setSelectedDirectory(result);
-        setImagePaths(result); // Set the image paths received from Rust
-      }
+      const result = await invoke("fetch_wallpapers");
+      setWallpapers(result);
     } catch (error) {
-      console.error('Error opening directory dialog:', error);
+      console.error("Error fetching wallpapers:", error);
+      setError("Error fetching wallpapers.");
     }
-  };
+  }
 
-  const changeWallpaper = (imagePath) => {
-    setSelectedImage(imagePath); // Set the selected image as wallpaper
-  };
+  async function setWallpaper(imagePath) {
+    try {
+      await invoke("setwallpaper", imagePath);
+      setSelectedWallpaper(imagePath);
+    } catch (error) {
+      console.error("Error setting wallpaper:", error);
+      setError("Error setting wallpaper.");
+    }
+  }
 
   return (
-    <div>
-      <button onClick={openDirectoryDialog}>Open Directory Dialog</button>
-      {imagePaths.map((imagePath, index) => (
-        <img
-          key={index}
-          src={`file://${imagePath}`}
-          alt={`Image ${index}`}
-          onClick={() => changeWallpaper(imagePath)}
-        />
-      ))}
-      {selectedImage && (
-        <div>
-          <h3>Selected Wallpaper</h3>
-          <img src={`file://${selectedImage}`} alt="Selected Wallpaper" />
-        </div>
-      )}
+    <div className="container">
+      <h1>Wallpaper Changer</h1>
+
+      <button onClick={fetchWallpapers}>Fetch Wallpapers</button>
+
+      <div className="wallpapers">
+        {wallpapers.map((wallpaper, index) => (
+          <img
+            key={index}
+            src={wallpaper}
+            alt={`Wallpaper ${index}`}
+            className={selectedWallpaper === wallpaper ? "selected" : ""}
+            onClick={() => setWallpaper(wallpaper)}
+          />
+        ))}
+      </div>
+      {error && <p className="error">{error}</p>}
     </div>
   );
-};
+}
 
 export default App;

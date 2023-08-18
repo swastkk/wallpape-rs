@@ -1,33 +1,54 @@
-use tauri::{ Window, State};
-use tauri_dialog::file::open_directory;
+use tauri::api::http::{Request, Method, ResponseType};
+// use tauri::{AppBuilder, Manager, State};
 
-struct AppState {
-    selected_directory: Option<String>,
-    image_paths: Vec<String>,
+#[tauri::command]
+fn fetch_wallpapers() -> Result<Vec<String>, String> {
+    let url = "https://wallhaven.cc/api/v1/search?sorting=random";
+
+    let request = Request::new(Method::Get, url)
+        .header("User-Agent", "Tauri")
+        .response_type(ResponseType::Text);
+
+    let response = match tauri::api::http::fetch(request) {
+        Ok(response) => response,
+        Err(err) => return Err(format!("Error fetching wallpapers: {:?}", err)),
+    };
+
+    let wallpapers: Vec<String> = match response.text() {
+        Ok(text) => {
+            let json: serde_json::Value = match serde_json::from_str(&text) {
+                Ok(json) => json,
+                Err(err) => return Err(format!("Error parsing JSON: {:?}", err)),
+            };
+
+            let mut result = Vec::new();
+            if let Some(array) = json["data"].as_array() {
+                for item in array {
+                    if let Some(path) = item["path"].as_str() {
+                        result.push(format!("https://wallhaven.cc{}", path));
+                    }
+                }
+            }
+            result
+        }
+        Err(err) => return Err(format!("Error reading response: {:?}", err)),
+    };
+
+    Ok(wallpapers)
+}
+
+#[tauri::command]
+async fn setwallpaper(image_path: String) -> Result<(), String> {
+    println!("{:?}", wallpaper::get());
+    wallpaper::set_from_path(&image_path).unwrap();
+    wallpaper::set_mode(wallpaper::Mode::Crop).unwrap();
+    println!("{:?}", wallpaper::get());
+    Ok(())
 }
 
 fn main() {
     tauri::Builder::default()
-        .setup(|app| {
-            app.add_resource(AppState {
-                selected_directory: None,
-                image_paths: Vec::new(),
-            });
-        })
-        .invoke_handler(tauri::generate_handler![open_directory_dialog])
+        .invoke_handler(tauri::generate_handler![fetch_wallpapers, setwallpaper])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-}
-
-#[tauri::command]
-fn open_directory_dialog(app_state: State<AppState>, window: Window) {
-    tauri::async_runtime::block_on(async {
-        if let Some(result) = open_directory().await.unwrap() {
-            let directory_path = result.path();
-            app_state.selected_directory.replace(directory_path.to_string_lossy().to_string());
-            let image_paths = // Retrieve image paths from the selected directory
-            app_state.image_paths = image_paths;
-            window.emit("directorySelected", app_state.image_paths.clone()).unwrap();
-        }
-    });
 }
