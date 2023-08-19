@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
+import "./App.css";
 
 function App() {
   const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState("");
+  const [wallpapers, setWallpapers] = useState([]); 
 
   useEffect(() => {
     async function fetchImages() {
@@ -16,13 +18,16 @@ function App() {
   async function setWallpaper(imagePath) {
     console.log("Button clicked. Image path:", imagePath);
     setSelectedImage(imagePath);
-    await invoke("setwallpaper", { imageUrl: imagePath }); // Pass imageUrl as an object
+    await invoke("setwallpaper", { imageUrl: imagePath }); 
   }
-  
-
+  async function refreshWallpapers() {
+    console.log("Refresh btn clicked!");
+    const newWallpapers = await invoke("fetch_wallpapers");
+    setWallpapers(newWallpapers);
+  }
   return (
     <div className="container">
-      <h1>Wallpaper App</h1>
+      <h1>wallpape-rs</h1>
       <div className="image-list">
         {images.map((image, index) => (
           <img
@@ -34,6 +39,7 @@ function App() {
           />
         ))}
       </div>
+      <button onClick={refreshWallpapers}>Refresh Wallpapers</button>
     </div>
   );
 }

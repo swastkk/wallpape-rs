@@ -5,7 +5,7 @@ use tempfile;
 use log::info;
 #[tauri::command]
 async fn fetch_wallpapers() -> Result<Vec<String>, String> {
-    let url: &str = "https://wallhaven.cc/api/v1/search?sorting=random";
+    let url: &str = "https://wallhaven.cc/api/v1/search?sorting=random&atleast=1920x1080&ratios=16x9";
 
     let response = reqwest::get(url)
         .await
