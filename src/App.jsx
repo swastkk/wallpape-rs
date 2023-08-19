@@ -1,50 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
-import "./App.css";
 
 function App() {
-  const [wallpapers, setWallpapers] = useState([]);
-  const [selectedWallpaper, setSelectedWallpaper] = useState("");
-  const [error, setError] = useState("");
+  const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState("");
 
-  async function fetchWallpapers() {
-    try {
-      const result = await invoke("fetch_wallpapers");
-      setWallpapers(result);
-    } catch (error) {
-      console.error("Error fetching wallpapers:", error);
-      setError("Error fetching wallpapers.");
+  useEffect(() => {
+    async function fetchImages() {
+      const fetchedImages = await invoke("fetch_wallpapers");
+      setImages(fetchedImages);
     }
-  }
+    fetchImages();
+  }, []);
 
   async function setWallpaper(imagePath) {
-    try {
-      await invoke("setwallpaper", imagePath);
-      setSelectedWallpaper(imagePath);
-    } catch (error) {
-      console.error("Error setting wallpaper:", error);
-      setError("Error setting wallpaper.");
-    }
+    console.log("Setting wallpaper:", imagePath);
+    setSelectedImage(imagePath);
+    await invoke("setwallpaper", imagePath);
   }
 
   return (
     <div className="container">
-      <h1>Wallpaper Changer</h1>
-
-      <button onClick={fetchWallpapers}>Fetch Wallpapers</button>
-
-      <div className="wallpapers">
-        {wallpapers.map((wallpaper, index) => (
+      <h1>Wallpaper App</h1>
+      <div className="image-list">
+        {images.map((image, index) => (
           <img
             key={index}
-            src={wallpaper}
-            alt={`Wallpaper ${index}`}
-            className={selectedWallpaper === wallpaper ? "selected" : ""}
-            onClick={() => setWallpaper(wallpaper)}
+            src={image}
+            alt={`Image ${index}`}
+            onClick={() => setWallpaper(image)}
+            className={selectedImage === image ? "selected" : ""}
           />
         ))}
       </div>
-      {error && <p className="error">{error}</p>}
     </div>
   );
 }
