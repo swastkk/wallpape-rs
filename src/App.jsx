@@ -14,10 +14,11 @@ function App() {
   }, []);
 
   async function setWallpaper(imagePath) {
-    console.log("Setting wallpaper:", imagePath);
+    console.log("Button clicked. Image path:", imagePath);
     setSelectedImage(imagePath);
-    await invoke("setwallpaper", imagePath);
+    await invoke("setwallpaper", { imageUrl: imagePath }); // Pass imageUrl as an object
   }
+  
 
   return (
     <div className="container">
