@@ -1,12 +1,13 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
-}
-
 .image-list img{
-  width: 33%;
+  width: 25%;
   height: auto;
+}
+.para{
+  font-weight: 900;
+}
+
+.refreshBtn{
+  background-color: #4d90fe;
+  color: white;
+  margin: auto 40%;
 }

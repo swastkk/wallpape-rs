@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import "./App.css";
-
+import logo from './assets/logo.png';
 function App() {
   const [images, setImages] = useState([]);
   const [selectedImage, setSelectedImage] = useState("");
@@ -30,7 +30,10 @@ function App() {
   }
   return (
     <div className="container">
-      <h1>wallpape-rs</h1>
+      <div>
+        <img className="logo" src={logo} alt="" />
+        <p className="para">Click on any wallpaper to set it as wallpaper!</p>
+      </div>
       <div className="image-list">
       {wallpapers.map((image, index) => (
         <img
@@ -41,7 +44,7 @@ function App() {
           className={selectedImage === image ? "selected" : ""} />
       ))}
       </div>
-      <button onClick={refreshWallpapers}>Refresh Wallpapers</button>
+      <button className="refreshBtn" onClick={refreshWallpapers}>Refresh Wallpapers ↻</button>
     </div>
   );
 }
