@@ -1,7 +1,7 @@
 [package]
 name = "wallpape-rs"
-version = "0.0.0"
-description = "A Tauri App"
+version = "1.1.0"
+description = "Wallpaper Application"
 authors = ["you"]
 license = ""
 repository = ""
@@ -22,7 +22,6 @@ dialog = "0.3.0"
 wallpaper = "3.2.0"
 tokio = "1.32.0"
 http = "0.2.9"
-ok = "0.1.0"
 reqwest = "0.11.18"
 tempfile = "3.8.0"
 log = "0.4.20"
