@@ -20,7 +20,11 @@ function App() {
   async function setWallpaper(imagePath) {
     console.log("Setting wallpaper:", imagePath);
     setSelectedImage(imagePath);
-    await invoke("setwallpaper", { imageUrl: imagePath });
+    try {
+      await invoke("setwallpaper", { imageUrl: imagePath });
+    } catch (error) {
+      alert("Failed to set wallpaper. Please try again.");
+    }
   }
   async function refreshWallpapers() {
     console.log("Refresh btn clicked!");
